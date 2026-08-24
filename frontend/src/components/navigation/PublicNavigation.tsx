@@ -4,7 +4,6 @@ import { Link, NavLink } from "react-router-dom";
 import { SITE_NAME } from "../../lib/constants";
 import { cn } from "../../lib/utils";
 import { LinkButton } from "../ui/Button";
-import { ThemeToggle } from "./ThemeToggle";
 
 const links = [
   { to: "/", label: "Home" },
@@ -32,11 +31,9 @@ export function PublicNavigation() {
           ))}
         </div>
         <div className="hidden items-center gap-2 lg:flex">
-          <ThemeToggle />
           <LinkButton to="/contact" icon={<ArrowUpRight className="size-4" aria-hidden="true" />}>Let's Talk</LinkButton>
         </div>
         <div className="flex items-center gap-2 lg:hidden">
-          <ThemeToggle />
           <button className="inline-flex size-10 items-center justify-center rounded-lg border border-white/10 text-white" aria-label="Open menu" onClick={() => setOpen(true)}>
             <Menu className="size-5" aria-hidden="true" />
           </button>
