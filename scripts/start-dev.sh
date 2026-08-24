@@ -20,9 +20,9 @@ fi
 # ensure DB schema exists
 python -c "from app.db.session import init_db; init_db()"
 
-# run alembic migrations (if alembic available)
-if command -v alembic >/dev/null 2>&1; then
-  alembic upgrade head || true
+# run alembic migrations (if alembic available). Run via python -m alembic with PYTHONPATH so env.py can import `app`.
+if command -v python >/dev/null 2>&1; then
+  PYTHONPATH="$ROOT_DIR/backend" python -m alembic upgrade head || true
 fi
 
 # start backend in background, log to logs/backend.log
