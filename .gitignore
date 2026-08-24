@@ -27,3 +27,5 @@ dist-ssr
 backend/portfolio.db
 backend/.venv
 backend/logs
+# Alembic/migrations pycache
+backend/migrations/__pycache__/
