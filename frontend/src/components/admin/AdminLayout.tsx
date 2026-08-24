@@ -43,7 +43,7 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-[#070a12] text-slate-100">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-white/10 bg-slate-950/90 p-4 lg:block">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-white/10 bg-slate-950/90 p-4 lg:block overflow-y-auto pb-20">
         <div className="mb-8 px-3 py-4 text-xl font-black text-white">
           <span className="bg-gradient-to-r from-violet-300 to-cyan-300 bg-clip-text text-transparent">MOSES DEV</span>
           <p className="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-slate-500">Admin</p>
