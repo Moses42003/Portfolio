@@ -99,7 +99,24 @@ function jsonOptions(method: string, body?: unknown): RequestOptions {
 
 async function mockRequest<T>(path: string, options: RequestOptions): Promise<T> {
   const method = (options.method ?? "GET").toUpperCase();
-  if (path === endpoints.profile) return wait(profile as T);
+  if (path === endpoints.profile) {
+    try {
+      const raw = localStorage.getItem("app_settings");
+      if (raw) {
+        const settings = JSON.parse(raw) as Record<string, any>;
+        const merged = { ...profile } as any;
+        if (settings.email) merged.email = settings.email;
+        if (settings.phone) merged.phone = settings.phone;
+        if (settings.name) merged.name = settings.name;
+        if (settings.brand) merged.brand = settings.brand ?? merged.brand;
+        if (settings.canonical_url) merged.socials = { ...(merged.socials ?? {}), website: settings.canonical_url };
+        return wait(merged as T);
+      }
+    } catch {
+      // ignore
+    }
+    return wait(profile as T);
+  }
   if (path === endpoints.featuredProjects) return wait(projects.filter((project) => project.featured) as T);
   if (path === endpoints.projects) return wait(projects as T);
   if (path.startsWith("/api/v1/projects/")) return wait(projects.find((project) => path.endsWith(project.slug)) as T);
