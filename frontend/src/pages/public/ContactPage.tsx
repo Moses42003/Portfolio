@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/Button";
 import { Seo } from "../../components/ui/Seo";
 import { useToast } from "../../components/ui/Toast";
 import { useSubmitContact } from "../../features/contact/hooks";
+import { useProfile } from "../../features/profile/hooks";
 
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -30,6 +31,12 @@ export function ContactPage() {
       notify(error instanceof Error ? error.message : "Unable to send message.", "error");
     }
   });
+  const profileQuery = useProfile();
+
+  const contactEmail = profileQuery.data?.email ?? "moses@example.com";
+  const contactPhone = (profileQuery.data as any)?.phone ?? "+233 000 000 000";
+  const contactLocation = profileQuery.data?.location ?? "Accra, Ghana";
+
   return (
     <>
       <Seo title="Contact" path="/contact" />
@@ -37,11 +44,11 @@ export function ContactPage() {
         <div className="grid gap-8 lg:grid-cols-[.8fr_1.2fr]">
           <aside className="rounded-lg border border-white/10 bg-white/[.035] p-6">
             <h2 className="text-2xl font-bold text-white">Contact Details</h2>
-            <div className="mt-6 grid gap-4 text-slate-300">
-              <p className="flex items-center gap-3"><Mail className="size-5 text-violet-300" /> moses@example.com</p>
-              <p className="flex items-center gap-3"><Phone className="size-5 text-violet-300" /> +233 000 000 000</p>
-              <p className="flex items-center gap-3"><MapPin className="size-5 text-violet-300" /> Accra, Ghana</p>
-            </div>
+              <div className="mt-6 grid gap-4 text-slate-300">
+                <p className="flex items-center gap-3"><Mail className="size-5 text-violet-300" /> {contactEmail}</p>
+                <p className="flex items-center gap-3"><Phone className="size-5 text-violet-300" /> {contactPhone}</p>
+                <p className="flex items-center gap-3"><MapPin className="size-5 text-violet-300" /> {contactLocation}</p>
+              </div>
             <div className="mt-8 flex gap-3">
               {[GitBranch, BriefcaseBusiness, Globe, Mail].map((Icon, index) => <a key={index} href="#" className="grid size-11 place-items-center rounded-lg border border-white/10 bg-slate-950/60 text-slate-300" aria-label={`Social link ${index + 1}`}><Icon className="size-5" /></a>)}
             </div>
