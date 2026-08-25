@@ -1,9 +1,9 @@
 import { endpoints } from "./endpoints";
-import { authResponse, dashboardMetrics, experience, messages, posts, profile, projects, skills, testimonials } from "./mock/data";
+import { authResponse, dashboardMetrics, experience, posts, profile, projects, skills, testimonials } from "./mock/data";
 import type { AuthResponse, BlogPost, ContactMessage, ContactPayload, Experience, LoginPayload, Project, Skill } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
-const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API !== "false";
+const USE_MOCK_API = import.meta.env.VITE_USE_MOCK_API === "true";
 const TIMEOUT_MS = 12_000;
 
 export class ApiError extends Error {
@@ -99,6 +99,7 @@ function jsonOptions(method: string, body?: unknown): RequestOptions {
 
 async function mockRequest<T>(path: string, options: RequestOptions): Promise<T> {
   const method = (options.method ?? "GET").toUpperCase();
+
   if (path === endpoints.profile) {
     try {
       const raw = localStorage.getItem("app_settings");
@@ -117,6 +118,28 @@ async function mockRequest<T>(path: string, options: RequestOptions): Promise<T>
     }
     return wait(profile as T);
   }
+
+  if (path === endpoints.admin.settings && method === "GET") {
+    const raw = localStorage.getItem("app_settings");
+    const settingsData = raw ? JSON.parse(raw) as Record<string, string> : {};
+    const items = Object.entries(settingsData).map(([key, value]) => ({ key, value: String(value) }));
+    return wait(items as T);
+  }
+
+  if (path === endpoints.admin.settings && method === "PUT") {
+    const body = options.body ? JSON.parse(String(options.body)) : {};
+    const data = { ...(JSON.parse(localStorage.getItem("app_settings") ?? "{}") as Record<string, string>) };
+    Object.entries(body.settings ?? {}).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === "") {
+        delete data[key];
+      } else {
+        data[key] = String(value);
+      }
+    });
+    localStorage.setItem("app_settings", JSON.stringify(data));
+    return wait({ status: "ok" } as T);
+  }
+
   if (path === endpoints.featuredProjects) return wait(projects.filter((project) => project.featured) as T);
   if (path === endpoints.projects) return wait(projects as T);
   if (path.startsWith("/api/v1/projects/")) return wait(projects.find((project) => path.endsWith(project.slug)) as T);
@@ -125,7 +148,13 @@ async function mockRequest<T>(path: string, options: RequestOptions): Promise<T>
   if (path === endpoints.blogPosts) return wait(posts as T);
   if (path.startsWith("/api/v1/blog/posts/")) return wait(posts.find((post) => path.endsWith(post.slug)) as T);
   if (path === endpoints.testimonials) return wait(testimonials as T);
-  if (path === endpoints.contact && method === "POST") throw new ApiError(503, "Contact API is not connected yet. Please try again after the backend is available.");
+  if (path === endpoints.contact && method === "POST") {
+    const body = options.body ? JSON.parse(String(options.body)) : {};
+    const message = { id: String(Date.now()), ...body, created_at: new Date().toISOString() };
+    const existing = JSON.parse(localStorage.getItem("mock_messages") ?? "[]") as Array<Record<string, unknown>>;
+    localStorage.setItem("mock_messages", JSON.stringify([...existing, message]));
+    return wait({ id: message.id } as T);
+  }
   if (path === endpoints.auth.login && method === "POST") return wait(authResponse as T);
   if (path === endpoints.auth.refresh && method === "POST") return wait(authResponse as T);
   if (path === endpoints.auth.me) return wait(authResponse.user as T);
@@ -136,8 +165,14 @@ async function mockRequest<T>(path: string, options: RequestOptions): Promise<T>
   if (path === endpoints.admin.skills) return wait(skills as T);
   if (path === endpoints.admin.experience) return wait(experience as T);
   if (path === endpoints.admin.blogPosts) return wait(posts as T);
-  if (path === endpoints.admin.messages) return wait(messages as T);
-  if (path.startsWith("/api/v1/admin/messages/")) return wait(messages.find((message) => path.endsWith(message.id)) as T);
+  if (path === endpoints.admin.messages) {
+    const items = JSON.parse(localStorage.getItem("mock_messages") ?? "[]") as Array<Record<string, unknown>>;
+    return wait(items as T);
+  }
+  if (path.startsWith("/api/v1/admin/messages/")) {
+    const items = JSON.parse(localStorage.getItem("mock_messages") ?? "[]") as Array<Record<string, unknown>>;
+    return wait(items.find((message) => path.endsWith(String(message.id))) as T);
+  }
   return wait({ ok: true } as T);
 }
 
@@ -173,5 +208,12 @@ export const api = {
     experience: () => api.get<Experience[]>(endpoints.admin.experience),
     blogPosts: () => api.get<BlogPost[]>(endpoints.admin.blogPosts),
     messages: () => api.get<ContactMessage[]>(endpoints.admin.messages),
+    settings: () => api.get<Array<{ key: string; value: string | null }>>(endpoints.admin.settings),
+    updateSettings: (settings: Record<string, string | null>) => api.put<{ status: string }>(endpoints.admin.settings, { settings }),
+  },
+  upload: (file: File) => {
+    const form = new FormData();
+    form.append("file", file);
+    return api.post<{ url: string }>(endpoints.uploads, form, { auth: true });
   },
 };

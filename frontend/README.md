@@ -19,10 +19,10 @@ Copy `.env.example` when local overrides are needed.
 
 ```bash
 VITE_API_BASE_URL=http://localhost:8000
-VITE_USE_MOCK_API=true
+VITE_USE_MOCK_API=false
 ```
 
-Set `VITE_USE_MOCK_API=false` to send requests to FastAPI.
+Set `VITE_USE_MOCK_API=true` only when you want to use the built-in mock data instead of FastAPI.
 
 ## Scripts
 

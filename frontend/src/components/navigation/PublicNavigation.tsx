@@ -40,20 +40,22 @@ export function PublicNavigation() {
         </div>
       </nav>
       {open ? (
-        <div className="fixed inset-0 z-[70] bg-slate-950/95 p-4 backdrop-blur lg:hidden">
-          <div className="flex items-center justify-between">
-            <span className="font-black text-white">{SITE_NAME}</span>
-            <button className="inline-flex size-10 items-center justify-center rounded-lg border border-white/10 text-white" aria-label="Close menu" onClick={() => setOpen(false)}>
-              <X className="size-5" aria-hidden="true" />
-            </button>
-          </div>
-          <div className="mt-10 grid gap-3">
-            {links.map((link) => (
-              <NavLink key={link.to} to={link.to} end={link.to === "/"} onClick={() => setOpen(false)} className={({ isActive }) => cn("rounded-lg border border-white/10 px-4 py-3 text-lg font-semibold text-slate-200", isActive && "border-violet-400/50 bg-violet-500/10 text-white")}>
-                {link.label}
-              </NavLink>
-            ))}
-            <LinkButton to="/contact" className="mt-3" onClick={() => setOpen(false)} icon={<ArrowUpRight className="size-4" aria-hidden="true" />}>Let's Talk</LinkButton>
+        <div className="fixed inset-0 z-[70] bg-slate-950 p-4 lg:hidden">
+          <div className="rounded-2xl border border-slate-700/80 bg-slate-900/95 p-4 shadow-2xl shadow-slate-950/40">
+            <div className="flex items-center justify-between">
+              <span className="font-black text-white">{SITE_NAME}</span>
+              <button className="inline-flex size-10 items-center justify-center rounded-lg border border-slate-600 bg-slate-800 text-white" aria-label="Close menu" onClick={() => setOpen(false)}>
+                <X className="size-5" aria-hidden="true" />
+              </button>
+            </div>
+            <div className="mt-8 grid gap-3">
+              {links.map((link) => (
+                <NavLink key={link.to} to={link.to} end={link.to === "/"} onClick={() => setOpen(false)} className={({ isActive }) => cn("rounded-xl border border-slate-700/80 bg-slate-800/80 px-4 py-3 text-lg font-semibold text-slate-100 transition hover:border-violet-400/60 hover:bg-slate-800", isActive && "border-violet-400/60 bg-violet-500/15 text-white")}>
+                  {link.label}
+                </NavLink>
+              ))}
+              <LinkButton to="/contact" className="mt-3" onClick={() => setOpen(false)} icon={<ArrowUpRight className="size-4" aria-hidden="true" />}>Let's Talk</LinkButton>
+            </div>
           </div>
         </div>
       ) : null}

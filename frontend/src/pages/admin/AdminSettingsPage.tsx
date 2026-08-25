@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { api } from "../../services/api/client";
 import { AdminPageHeader } from "../../components/admin/AdminTable";
 
 const STORAGE_KEY = "app_settings";
@@ -14,28 +15,62 @@ type Settings = {
 export function AdminSettingsPage() {
   const [settings, setSettings] = useState<Settings>({});
   const [saved, setSaved] = useState(false);
+  const useMock = import.meta.env.VITE_USE_MOCK_API !== "false";
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setSettings(JSON.parse(raw));
-    } catch {
-      /* ignore */
+    async function loadSettings() {
+      try {
+        if (useMock) {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) setSettings(JSON.parse(raw));
+          return;
+        }
+
+        const rows = await api.admin.settings();
+        const next = Object.fromEntries(rows.map((row) => [row.key, row.value ?? ""])) as Settings;
+        setSettings(next);
+      } catch {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) setSettings(JSON.parse(raw));
+        } catch {
+          // ignore
+        }
+      }
     }
-  }, []);
+
+    void loadSettings();
+  }, [useMock]);
 
   function update<K extends keyof Settings>(key: K, value: Settings[K]) {
     setSettings((s) => ({ ...s, [key]: value }));
     setSaved(false);
   }
 
-  function handleSave() {
+  async function handleSave() {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      const payload = {
+        name: settings.name ?? null,
+        brand: settings.brand ?? null,
+        email: settings.email ?? null,
+        phone: settings.phone ?? null,
+        canonical_url: settings.canonical_url ?? null,
+      };
+
+      if (!useMock) {
+        await api.admin.updateSettings(payload);
+      } else {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      }
+
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch (e) {
-      // ignore
+    } catch {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      } catch {
+        // ignore
+      }
     }
   }
 
@@ -81,8 +116,8 @@ export function AdminSettingsPage() {
       </div>
 
       <div className="mt-6 flex items-center gap-3">
-        <button onClick={handleSave} className="rounded-md bg-violet-500 px-4 py-2 font-semibold text-white">Save Settings</button>
-        {saved ? <span className="text-sm text-emerald-400">Saved</span> : <span className="text-sm text-slate-400">Changes are saved to local dev storage</span>}
+        <button onClick={() => void handleSave()} className="rounded-md bg-violet-500 px-4 py-2 font-semibold text-white">Save Settings</button>
+        {saved ? <span className="text-sm text-emerald-400">Saved</span> : <span className="text-sm text-slate-400">{useMock ? "Changes are saved to local dev storage" : "Saved to the backend"}</span>}
       </div>
     </section>
   );

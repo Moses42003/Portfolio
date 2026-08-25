@@ -28,5 +28,7 @@ export const endpoints = {
     blogPost: (id: string) => `/api/v1/admin/blog/posts/${id}`,
     messages: "/api/v1/admin/messages",
     message: (id: string) => `/api/v1/admin/messages/${id}`,
+    settings: "/api/v1/admin/settings",
   },
+  uploads: "/api/v1/uploads",
 } as const;
