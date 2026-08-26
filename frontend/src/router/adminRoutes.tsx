@@ -9,7 +9,9 @@ const AdminDashboardPage = lazy(() => import("../pages/admin/AdminDashboardPage"
 const AdminProjectsPage = lazy(() => import("../pages/admin/AdminProjectsPage").then((module) => ({ default: module.AdminProjectsPage })));
 const AdminProjectEditorPage = lazy(() => import("../pages/admin/AdminProjectEditorPage").then((module) => ({ default: module.AdminProjectEditorPage })));
 const AdminSkillsPage = lazy(() => import("../pages/admin/AdminSkillsPage").then((module) => ({ default: module.AdminSkillsPage })));
+const AdminSkillEditorPage = lazy(() => import("../pages/admin/AdminSkillEditorPage").then((module) => ({ default: module.AdminSkillEditorPage })));
 const AdminExperiencePage = lazy(() => import("../pages/admin/AdminExperiencePage").then((module) => ({ default: module.AdminExperiencePage })));
+const AdminExperienceEditorPage = lazy(() => import("../pages/admin/AdminExperienceEditorPage").then((module) => ({ default: module.AdminExperienceEditorPage })));
 const AdminBlogPage = lazy(() => import("../pages/admin/AdminBlogPage").then((module) => ({ default: module.AdminBlogPage })));
 const AdminBlogEditorPage = lazy(() => import("../pages/admin/AdminBlogEditorPage").then((module) => ({ default: module.AdminBlogEditorPage })));
 const AdminTestimonialsPage = lazy(() => import("../pages/admin/AdminTestimonialsPage").then((module) => ({ default: module.AdminTestimonialsPage })));
@@ -33,7 +35,9 @@ export const adminRoutes: RouteObject[] = [
           { path: "projects/new", element: <AdminProjectEditorPage /> },
           { path: "projects/:id/edit", element: <AdminProjectEditorPage /> },
           { path: "skills", element: <AdminSkillsPage /> },
+          { path: "skills/new", element: <AdminSkillEditorPage /> },
           { path: "experience", element: <AdminExperiencePage /> },
+          { path: "experience/new", element: <AdminExperienceEditorPage /> },
           { path: "blog", element: <AdminBlogPage /> },
           { path: "blog/new", element: <AdminBlogEditorPage /> },
           { path: "blog/:id/edit", element: <AdminBlogEditorPage /> },

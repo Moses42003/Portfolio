@@ -19,9 +19,11 @@ def list_featured_projects(db: Session = Depends(get_db)) -> list[Project]:
     return db.query(Project).filter(Project.featured.is_(True)).order_by(Project.order_index).all()
 
 
-@router.get("/{project_id}", response_model=ProjectOut)
-def get_project(project_id: int, db: Session = Depends(get_db)) -> Project:
-    project = db.query(Project).filter(Project.id == project_id).first()
+@router.get("/{project_ref}", response_model=ProjectOut)
+def get_project(project_ref: str, db: Session = Depends(get_db)) -> Project:
+    project = db.query(Project).filter(Project.slug == project_ref).first()
+    if project is None and project_ref.isdigit():
+        project = db.query(Project).filter(Project.id == int(project_ref)).first()
     if not project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     return project

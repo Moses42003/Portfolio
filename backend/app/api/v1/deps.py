@@ -1,9 +1,7 @@
 from collections.abc import Generator
-from typing import Any
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -11,7 +9,7 @@ from app.core.security import decode_token
 from app.db.models.admin import AdminUser
 from app.db.session import SessionLocal
 
-security = HTTPBearer()
+security = HTTPBearer(auto_error=False)
 settings = get_settings()
 
 
@@ -24,9 +22,15 @@ def get_db() -> Generator[Session, None, None]:
 
 
 def get_current_admin(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security),
     db: Session = Depends(get_db),
 ) -> AdminUser:
+    if credentials is None or not credentials.credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     token = credentials.credentials
     try:
         payload = decode_token(token)

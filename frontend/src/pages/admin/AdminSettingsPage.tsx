@@ -15,7 +15,7 @@ type Settings = {
 export function AdminSettingsPage() {
   const [settings, setSettings] = useState<Settings>({});
   const [saved, setSaved] = useState(false);
-  const useMock = import.meta.env.VITE_USE_MOCK_API !== "false";
+  const useMock = import.meta.env.VITE_USE_MOCK_API === "true";
 
   useEffect(() => {
     async function loadSettings() {

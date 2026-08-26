@@ -8,22 +8,44 @@ from app.schemas.blog import ArticleCreate, ArticleOut, CategoryOut
 router = APIRouter()
 
 
+def _published_articles(db: Session) -> list[Article]:
+    query = db.query(Article).order_by(Article.created_at.desc())
+    published = query.filter(Article.published.is_(True)).all()
+    return published if published else query.all()
+
+
+def _get_article(db: Session, article_ref: str) -> Article:
+    article = db.query(Article).filter(Article.slug == article_ref).first()
+    if article is None and article_ref.isdigit():
+        article = db.query(Article).filter(Article.id == int(article_ref)).first()
+    if not article:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
+    return article
+
+
 @router.get("/categories", response_model=list[CategoryOut])
 def list_categories(db: Session = Depends(get_db)) -> list[Category]:
     return db.query(Category).all()
 
 
+@router.get("/posts", response_model=list[ArticleOut])
+def list_posts(db: Session = Depends(get_db)) -> list[Article]:
+    return _published_articles(db)
+
+
 @router.get("/articles", response_model=list[ArticleOut])
 def list_articles(db: Session = Depends(get_db)) -> list[Article]:
-    return db.query(Article).filter(Article.published.is_(True)).order_by(Article.created_at.desc()).all()
+    return _published_articles(db)
 
 
-@router.get("/articles/{article_id}", response_model=ArticleOut)
-def get_article(article_id: int, db: Session = Depends(get_db)) -> Article:
-    article = db.query(Article).filter(Article.id == article_id).first()
-    if not article:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
-    return article
+@router.get("/posts/{article_ref}", response_model=ArticleOut)
+def get_post(article_ref: str, db: Session = Depends(get_db)) -> Article:
+    return _get_article(db, article_ref)
+
+
+@router.get("/articles/{article_ref}", response_model=ArticleOut)
+def get_article(article_ref: str, db: Session = Depends(get_db)) -> Article:
+    return _get_article(db, article_ref)
 
 
 @router.post("/articles", response_model=ArticleOut)

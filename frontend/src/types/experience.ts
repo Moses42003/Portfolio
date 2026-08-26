@@ -8,7 +8,7 @@ export interface Experience {
   start_date: ISODateString;
   end_date?: ISODateString;
   current: boolean;
-  description: string;
-  responsibilities: string[];
-  technologies: string[];
+  description?: string;
+  responsibilities?: string[];
+  technologies?: string[];
 }

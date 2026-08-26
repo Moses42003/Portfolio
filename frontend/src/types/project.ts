@@ -12,6 +12,7 @@ export interface Project {
   technologies: Technology[];
   github_url?: string;
   live_url?: string;
+  project_url?: string;
   featured: boolean;
   status: PublishStatus;
   year: string;
